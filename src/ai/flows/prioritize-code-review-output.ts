@@ -17,6 +17,7 @@ const PrioritizeCodeReviewOutputInputSchema = z.array(
     line: z.number().optional().describe('The line number where the issue was found.'),
     issue: z.string().describe('A description of the issue.'),
     fix: z.string().describe('A suggested fix for the issue.'),
+    originalCode: z.string().optional().describe('The original code with the issue.'),
   })
 ).describe('An array of code review issues.');
 
@@ -29,6 +30,7 @@ const PrioritizeCodeReviewOutputOutputSchema = z.array(
     line: z.number().optional().describe('The line number where the issue was found.'),
     issue: z.string().describe('A description of the issue.'),
     fix: z.string().describe('A suggested fix for the issue.'),
+    originalCode: z.string().optional().describe('The original code with the issue.'),
   })
 ).describe('An array of code review issues, prioritized by severity.');
 

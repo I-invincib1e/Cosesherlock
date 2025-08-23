@@ -4,4 +4,5 @@ export interface CodeIssue {
   line?: number;
   issue: string;
   fix: string;
+  originalCode?: string;
 }

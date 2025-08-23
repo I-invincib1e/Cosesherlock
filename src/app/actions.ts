@@ -13,6 +13,7 @@ const ReviewSchema = z.object({
 interface ReviewState {
   issues?: CodeIssue[];
   error?: string;
+  originalCode?: string;
 }
 
 export async function getCodeReview(prevState: any, formData: FormData): Promise<ReviewState> {
@@ -36,12 +37,14 @@ export async function getCodeReview(prevState: any, formData: FormData): Promise
     });
 
     if (!reviewResult || !reviewResult.issues || reviewResult.issues.length === 0) {
-      return { issues: [] };
+      return { issues: [], originalCode: code };
     }
+    
+    const issuesWithOriginalCode = reviewResult.issues.map(issue => ({ ...issue, originalCode: code }));
 
-    const prioritizedResult = await prioritizeCodeReviewOutput(reviewResult.issues);
+    const prioritizedResult = await prioritizeCodeReviewOutput(issuesWithOriginalCode);
 
-    return { issues: prioritizedResult };
+    return { issues: prioritizedResult, originalCode: code };
   } catch (e: any) {
     console.error(e);
     return { error: e.message || 'An unexpected error occurred. Please try again.' };

@@ -1,6 +1,6 @@
 'use client';
 
-import { useActionState } from 'react';
+import React, { useActionState } from 'react';
 import { useFormStatus } from 'react-dom';
 import { getCodeReview } from './actions';
 import { Textarea } from '@/components/ui/textarea';
@@ -25,6 +25,7 @@ import {
   Wand2,
 } from 'lucide-react';
 import type { CodeIssue } from '@/lib/types';
+import * as Diff from 'diff';
 
 function SubmitButton() {
   const { pending } = useFormStatus();
@@ -65,6 +66,34 @@ function SeverityBadge({ severity }: { severity: string }) {
     <Badge variant="secondary" className="gap-1.5 whitespace-nowrap">
       <Info className="h-3.5 w-3.5" /> Low Severity
     </Badge>
+  );
+}
+
+function DiffView({ oldCode, newCode }: { oldCode: string; newCode: string }) {
+  const diffResult = Diff.diffLines(oldCode, newCode, { newlineIsToken: true });
+
+  return (
+    <pre className="bg-muted p-4 rounded-md overflow-x-auto border text-sm">
+      <code>
+        {diffResult.map((part, index) => {
+          const color = part.added
+            ? 'text-green-500'
+            : part.removed
+            ? 'text-red-500'
+            : 'text-muted-foreground';
+          
+          const prefix = part.added ? '+ ' : part.removed ? '- ' : '  ';
+
+          return (
+            <span key={index} className={color}>
+              {part.value.split('\n').map((line, i) => (
+                 line && <span key={i} className="block">{prefix}{line}</span>
+              ))}
+            </span>
+          );
+        })}
+      </code>
+    </pre>
   );
 }
 
@@ -175,11 +204,7 @@ function ResultsDisplay({
                 </div>
                 <div>
                   <h4 className="font-semibold mb-2 text-foreground/90">Suggested Fix</h4>
-                  <pre className="bg-muted p-4 rounded-md overflow-x-auto border">
-                    <code className="font-code text-sm text-muted-foreground">
-                      {issue.fix}
-                    </code>
-                  </pre>
+                  <DiffView oldCode={issue.originalCode || ''} newCode={issue.fix} />
                 </div>
               </AccordionContent>
             </AccordionItem>
@@ -191,7 +216,7 @@ function ResultsDisplay({
 }
 
 export function CodeSherlockClient() {
-  const initialState = { issues: undefined, error: undefined };
+  const initialState = { issues: undefined, error: undefined, originalCode: undefined };
   const [state, formAction] = useActionState(getCodeReview, initialState);
 
   return (
