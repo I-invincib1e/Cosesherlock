@@ -20,6 +20,7 @@ const ReviewCodeForIssuesOutputSchema = z.object({
   issues: z.array(
     z.object({
       severity: z.string().describe('The severity of the issue (e.g., high, medium, low).'),
+      isSecurityIssue: z.boolean().describe('Whether the issue is a security vulnerability.'),
       file: z.string().describe('The file where the issue was found.'),
       line: z.number().optional().describe('The line number where the issue was found.'),
       issue: z.string().describe('A description of the issue.'),
@@ -37,18 +38,26 @@ const reviewCodeForIssuesPrompt = ai.definePrompt({
   name: 'reviewCodeForIssuesPrompt',
   input: {schema: ReviewCodeForIssuesInputSchema},
   output: {schema: ReviewCodeForIssuesOutputSchema},
-  prompt: `Review this code for correctness, security, and complexity. Output a JSON array of issues with suggested fixes.
+  prompt: `You are an expert security code reviewer. Review this code for correctness, security vulnerabilities, and complexity. It is critical that you identify any security issues. Output a JSON array of issues with suggested fixes.
 
       The code is provided as a diff:
       {{diff}}
 
-      Each issue should include: severity, file, line (if applicable), issue, and fix. The file name is {{fileName}}.
+      For each issue, include:
+      - severity: high, medium, or low
+      - isSecurityIssue: true if it is a security vulnerability, false otherwise
+      - file: the file name, which is {{fileName}}
+      - line: the line number, if applicable
+      - issue: a description of the issue
+      - fix: a suggested fix for the issue
+
       The JSON should conform to this schema:
       \`\`\`json
       {
         "issues": [
           {
             "severity": "string",
+            "isSecurityIssue": boolean,
             "file": "string",
             "line": "number?",
             "issue": "string",

@@ -11,7 +11,7 @@ export default function LandingPage() {
           <span className="text-xl font-bold">Code Sherlock</span>
         </Link>
         <nav className="flex items-center gap-4">
-          <Link href="https://github.com" target="_blank" rel="noopener noreferrer">
+          <Link href="https://github.com/FirebaseExtended/codelab-genkit-code-sherlock" target="_blank" rel="noopener noreferrer">
             <Button variant="ghost" size="icon">
               <Github className="h-5 w-5" />
               <span className="sr-only">GitHub</span>
@@ -40,7 +40,7 @@ export default function LandingPage() {
                 Get Started
               </Button>
             </Link>
-            <Link href="https://github.com" target="_blank" rel="noopener noreferrer">
+            <Link href="https://github.com/FirebaseExtended/codelab-genkit-code-sherlock" target="_blank" rel="noopener noreferrer">
               <Button size="lg" variant="outline" className="text-lg px-8 py-6">
                 <Github className="mr-2 h-5 w-5" />
                 View on GitHub

@@ -20,6 +20,7 @@ import {
   Info,
   Lightbulb,
   Loader2,
+  ShieldCheck,
   Wand2,
 } from 'lucide-react';
 import type { CodeIssue } from '@/lib/types';
@@ -44,8 +45,17 @@ function SubmitButton() {
   );
 }
 
-function SeverityBadge({ severity }: { severity: string }) {
+function SeverityBadge({ severity, isSecurityIssue }: { severity: string, isSecurityIssue?: boolean }) {
   const lowerSeverity = severity.toLowerCase();
+
+  if(isSecurityIssue) {
+    return (
+      <Badge variant="destructive" className="gap-1.5 whitespace-nowrap">
+        <ShieldCheck className="h-3.5 w-3.5" /> Security Risk
+      </Badge>
+    );
+  }
+
   if (lowerSeverity === 'high') {
     return (
       <Badge variant="destructive" className="gap-1.5 whitespace-nowrap">
@@ -225,7 +235,7 @@ function ResultsDisplay({
                     {issue.line && ` on line ${issue.line}`}
                     </div>
                 </div>
-                <SeverityBadge severity={issue.severity} />
+                <SeverityBadge severity={issue.severity} isSecurityIssue={issue.isSecurityIssue} />
              </div>
             
             <DiffView oldCode={issue.originalCode || ''} newCode={issue.fix} />
