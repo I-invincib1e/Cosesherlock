@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useActionState, useEffect, useState } from 'react';
+import React, { useActionState, useState } from 'react';
 import { useFormStatus } from 'react-dom';
 import { getCodeReview } from './actions';
 import { Textarea } from '@/components/ui/textarea';
@@ -70,7 +70,6 @@ function SeverityBadge({ severity }: { severity: string }) {
 function DiffView({ oldCode, newCode }: { oldCode: string; newCode: string }) {
   const diffResult = Diff.diffLines(oldCode, newCode, { newlineIsToken: false, ignoreWhitespace: false });
 
-  // Check if there are any actual changes
   const hasChanges = diffResult.some(part => part.added || part.removed);
 
   if (!hasChanges) {
@@ -101,54 +100,30 @@ function DiffView({ oldCode, newCode }: { oldCode: string; newCode: string }) {
                  <span className="text-red-500">-{removedLines} deletions</span>
             </div>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-                <h5 className="font-semibold text-sm mb-2 text-muted-foreground">Before</h5>
-                <pre className="bg-muted/50 p-4 rounded-md overflow-x-auto border text-sm h-full">
-                <code>
-                    {diffResult.map((part, index) => {
-                    if (part.added) return null;
-                    const color = part.removed ? 'text-red-500' : 'text-muted-foreground opacity-70';
-                    const prefix = part.removed ? '- ' : '  ';
-                    
-                    return (
-                        <span key={index} className={color}>
-                        {part.value.split('\n').filter(line => line).map((line, i) => (
-                            <span key={i} className="block">
-                            <span className="inline-block w-6 text-right pr-2 select-none">{prefix}</span>
-                            <span>{line}</span>
-                            </span>
-                        ))}
-                        </span>
-                    );
-                    })}
-                </code>
-                </pre>
-            </div>
-            <div>
-                 <h5 className="font-semibold text-sm mb-2 text-muted-foreground">After</h5>
-                <pre className="bg-muted/50 p-4 rounded-md overflow-x-auto border text-sm h-full">
-                <code>
-                    {diffResult.map((part, index) => {
-                    if (part.removed) return null;
-                    const color = part.added ? 'text-green-500' : 'text-muted-foreground opacity-70';
-                    const prefix = part.added ? '+ ' : '  ';
-
-                    return (
-                        <span key={index} className={color}>
-                        {part.value.split('\n').filter(line => line).map((line, i) => (
-                             <span key={i} className="block">
-                             <span className="inline-block w-6 text-right pr-2 select-none">{prefix}</span>
-                             <span>{line}</span>
-                            </span>
-                        ))}
-                        </span>
-                    );
-                    })}
-                </code>
-                </pre>
-            </div>
-        </div>
+        <pre className="bg-muted p-4 rounded-md overflow-x-auto border text-sm">
+          <code>
+            {diffResult.map((part, index) => {
+              const color = part.added
+                ? 'text-green-500'
+                : part.removed
+                ? 'text-red-500'
+                : 'text-muted-foreground opacity-70';
+              
+              const prefix = part.added ? '+' : part.removed ? '-' : ' ';
+              
+              return (
+                <span key={index} className={color}>
+                  {part.value.split('\n').filter(line => line).map((line, i) => (
+                      <span key={i} className="block">
+                        <span className="inline-block w-4 text-right pr-2 select-none">{prefix}</span>
+                        <span>{line}</span>
+                      </span>
+                  ))}
+                </span>
+              );
+            })}
+          </code>
+        </pre>
     </div>
   );
 }
@@ -161,6 +136,27 @@ function ResultsDisplay({
   error?: string;
 }) {
   const { pending } = useFormStatus();
+  const [showResults, setShowResults] = useState(false);
+
+  React.useEffect(() => {
+    if (pending || issues || error) {
+      setShowResults(true);
+    }
+  }, [pending, issues, error]);
+
+  if (!showResults) {
+    return (
+      <Card className="text-center h-full flex flex-col justify-center items-center p-8 lg:min-h-[600px]">
+        <div className="mx-auto bg-secondary p-4 rounded-full w-fit mb-4">
+          <Lightbulb className="h-10 w-10 text-secondary-foreground" />
+        </div>
+        <CardTitle className="mb-2 text-xl">Ready to Review</CardTitle>
+        <p className="text-muted-foreground max-w-sm">
+          Submit your code using the form to start the analysis.
+        </p>
+      </Card>
+    );
+  }
 
   if (pending) {
     return (
@@ -194,21 +190,7 @@ function ResultsDisplay({
     );
   }
 
-  if (!issues) {
-    return (
-      <Card className="text-center h-full flex flex-col justify-center items-center p-8">
-        <div className="mx-auto bg-secondary p-4 rounded-full w-fit mb-4">
-          <Lightbulb className="h-10 w-10 text-secondary-foreground" />
-        </div>
-        <CardTitle className="mb-2 text-xl">Ready to Review</CardTitle>
-        <p className="text-muted-foreground max-w-sm">
-          Submit your code using the form on the left to start the analysis.
-        </p>
-      </Card>
-    );
-  }
-
-  if (issues.length === 0) {
+  if (issues && issues.length === 0) {
     return (
       <Card>
         <CardHeader>
@@ -229,11 +211,11 @@ function ResultsDisplay({
       <CardHeader>
         <CardTitle>Analysis Results</CardTitle>
         <CardDescription>
-          Found {issues.length} issue{issues.length > 1 ? 's' : ''}. Here's the breakdown:
+          Found {issues?.length || 0} issue{issues?.length === 1 ? '' : 's'}. Here's the breakdown:
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
-        {issues.map((issue, index) => (
+        {issues && issues.map((issue, index) => (
            <div key={index} className="border-t pt-6">
              <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-4">
                 <div className="flex-1 space-y-2">
@@ -260,8 +242,8 @@ export function CodeSherlockClient() {
   const [state, formAction] = useActionState(getCodeReview, initialState);
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
-      <Card className="lg:sticky top-8">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
+      <Card className="md:sticky top-8">
         <CardHeader>
           <CardTitle>Submit Code for Review</CardTitle>
           <CardDescription>

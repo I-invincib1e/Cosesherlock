@@ -34,7 +34,7 @@ export default function LandingPage() {
           <p className="mt-6 max-w-3xl mx-auto text-lg md:text-xl text-muted-foreground">
             Code Sherlock helps you ship better code, faster. Our AI agent analyzes your code for correctness, security, and complexity, providing prioritized fixes to keep you moving.
           </p>
-          <div className="mt-8 flex justify-center gap-4">
+          <div className="mt-8 flex flex-col sm:flex-row justify-center gap-4">
             <Link href="/app">
               <Button size="lg" className="text-lg px-8 py-6">
                 Get Started
