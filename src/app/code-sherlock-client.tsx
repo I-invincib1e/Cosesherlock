@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useActionState } from 'react';
+import { useActionState } from 'react';
 import { useFormStatus } from 'react-dom';
 import { getCodeReview } from './actions';
 import { Textarea } from '@/components/ui/textarea';
