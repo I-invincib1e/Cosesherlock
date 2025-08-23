@@ -24,7 +24,7 @@ const ReviewCodeForIssuesOutputSchema = z.object({
       file: z.string().describe('The file where the issue was found.'),
       line: z.number().optional().describe('The line number where the issue was found.'),
       issue: z.string().describe('A description of the issue.'),
-      fix: z.string().describe('A suggested fix for the issue.'),
+      fix: z.string().describe('A suggested fix for the issue, including comments to explain the changes.'),
     })
   ).describe('A list of issues found in the code.'),
 });
@@ -47,9 +47,9 @@ const reviewCodeForIssuesPrompt = ai.definePrompt({
       - severity: high, medium, or low
       - isSecurityIssue: true if it is a security vulnerability, false otherwise
       - file: the file name, which is {{fileName}}
-      - line: the line number, if applicable
-      - issue: a description of the issue
-      - fix: a suggested fix for the issue
+      - line: the line number where the issue is found. This is very important.
+      - issue: a detailed description of the issue.
+      - fix: a suggested fix for the issue. IMPORTANT: The fix should be the corrected code block, and you MUST add comments within the code to explain what was changed and why.
 
       The JSON should conform to this schema:
       \`\`\`json
