@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-import { useFormState, useFormStatus } from 'react-dom';
+import { useState, useActionState } from 'react';
+import { useFormStatus } from 'react-dom';
 import { getCodeReview } from './actions';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
@@ -162,7 +162,7 @@ function ResultsDisplay({ issues, error }: { issues?: CodeIssue[], error?: strin
 
 export function CodeSherlockClient() {
   const initialState = { issues: undefined, error: undefined };
-  const [state, formAction] = useFormState(getCodeReview, initialState);
+  const [state, formAction] = useActionState(getCodeReview, initialState);
   
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
