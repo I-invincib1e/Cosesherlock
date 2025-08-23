@@ -1,13 +1,12 @@
 'use client';
 
-import React from 'react';
 import { useActionState } from 'react';
 import { useFormStatus } from 'react-dom';
 import { getCodeReview } from './actions';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import {
   Accordion,
   AccordionContent,
@@ -26,7 +25,6 @@ import {
   Wand2,
 } from 'lucide-react';
 import type { CodeIssue } from '@/lib/types';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 function SubmitButton() {
   const { pending } = useFormStatus();
@@ -84,6 +82,7 @@ function ResultsDisplay({
       <Card>
         <CardHeader>
           <CardTitle>Analyzing Code...</CardTitle>
+          <CardDescription>Please wait while we check your code for issues.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           {[...Array(3)].map((_, i) => (
@@ -112,7 +111,7 @@ function ResultsDisplay({
 
   if (!issues) {
     return (
-      <Card className="text-center">
+      <Card className="text-center h-full flex flex-col justify-center">
         <CardHeader>
           <div className="mx-auto bg-secondary p-3 rounded-full w-fit">
             <Lightbulb className="h-8 w-8 text-secondary-foreground" />
@@ -121,7 +120,7 @@ function ResultsDisplay({
         <CardContent>
           <CardTitle className="mb-2">Ready to Review</CardTitle>
           <p className="text-muted-foreground">
-            Enter a filename and paste your code to start the analysis.
+            Submit your code to start the analysis.
           </p>
         </CardContent>
       </Card>
@@ -133,11 +132,12 @@ function ResultsDisplay({
       <Card>
         <CardHeader>
           <CardTitle>All Clear!</CardTitle>
+          <CardDescription>No issues found in the provided code. Great job!</CardDescription>
         </CardHeader>
         <CardContent>
-          <p className="text-muted-foreground">
-            No issues found in the provided code. Great job!
-          </p>
+          <div className="text-center text-muted-foreground p-8">
+            <p>No issues found. Your code looks clean!</p>
+          </div>
         </CardContent>
       </Card>
     );
@@ -146,7 +146,10 @@ function ResultsDisplay({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Review Results</CardTitle>
+        <CardTitle>Analysis Results</CardTitle>
+        <CardDescription>
+          Found {issues.length} issue{issues.length > 1 ? 's' : ''}. Here's the breakdown:
+        </CardDescription>
       </CardHeader>
       <CardContent>
         <Accordion type="single" collapsible className="w-full">
@@ -167,12 +170,12 @@ function ResultsDisplay({
                   {issue.line && ` on line ${issue.line}`}
                 </div>
                 <div>
-                  <h4 className="font-semibold mb-2">Issue Description</h4>
+                  <h4 className="font-semibold mb-2 text-foreground/90">Issue Description</h4>
                   <p className="text-muted-foreground">{issue.issue}</p>
                 </div>
                 <div>
-                  <h4 className="font-semibold mb-2">Suggested Fix</h4>
-                  <pre className="bg-muted p-4 rounded-md overflow-x-auto">
+                  <h4 className="font-semibold mb-2 text-foreground/90">Suggested Fix</h4>
+                  <pre className="bg-muted p-4 rounded-md overflow-x-auto border">
                     <code className="font-code text-sm text-muted-foreground">
                       {issue.fix}
                     </code>
@@ -190,67 +193,49 @@ function ResultsDisplay({
 export function CodeSherlockClient() {
   const initialState = { issues: undefined, error: undefined };
   const [state, formAction] = useActionState(getCodeReview, initialState);
-  const { pending } = useFormStatus();
-  const [activeTab, setActiveTab] = React.useState('review');
-
-  React.useEffect(() => {
-    if (pending || state.issues || state.error) {
-      setActiveTab('analysis');
-    }
-  }, [pending, state.issues, state.error]);
 
   return (
-    <Tabs
-      value={activeTab}
-      onValueChange={setActiveTab}
-      className="w-full"
-    >
-      <div className="flex justify-center">
-        <TabsList>
-          <TabsTrigger value="review">Review</TabsTrigger>
-          <TabsTrigger value="analysis" disabled={!state.issues && !state.error && !pending}>Analysis</TabsTrigger>
-        </TabsList>
-      </div>
-
-      <TabsContent value="review">
-        <Card>
-          <CardHeader>
-            <CardTitle>Submit Code for Review</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <form action={formAction} className="space-y-4">
-              <div className="space-y-2">
-                <label htmlFor="fileName" className="text-sm font-medium">
-                  File Name
-                </label>
-                <Input
-                  id="fileName"
-                  name="fileName"
-                  placeholder="e.g., src/components/button.tsx"
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <label htmlFor="code" className="text-sm font-medium">
-                  Code
-                </label>
-                <Textarea
-                  id="code"
-                  name="code"
-                  placeholder="Paste your code or code diff here..."
-                  className="font-code min-h-[300px] lg:min-h-[400px]"
-                  required
-                />
-              </div>
-              <SubmitButton />
-            </form>
-          </CardContent>
-        </Card>
-      </TabsContent>
-
-      <TabsContent value="analysis">
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+      <Card>
+        <CardHeader>
+          <CardTitle>Submit Code for Review</CardTitle>
+          <CardDescription>
+            Enter a filename and paste your code or diff to start.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form action={formAction} className="space-y-4">
+            <div className="space-y-2">
+              <label htmlFor="fileName" className="text-sm font-medium">
+                File Name
+              </label>
+              <Input
+                id="fileName"
+                name="fileName"
+                placeholder="e.g., src/components/button.tsx"
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <label htmlFor="code" className="text-sm font-medium">
+                Code
+              </label>
+              <Textarea
+                id="code"
+                name="code"
+                placeholder="Paste your code or code diff here..."
+                className="font-code min-h-[300px] lg:min-h-[400px]"
+                required
+              />
+            </div>
+            <SubmitButton />
+          </form>
+        </CardContent>
+      </Card>
+      
+      <div className="lg:sticky top-8">
         <ResultsDisplay issues={state.issues} error={state.error} />
-      </TabsContent>
-    </Tabs>
+      </div>
+    </div>
   );
 }

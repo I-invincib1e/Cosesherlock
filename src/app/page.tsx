@@ -17,7 +17,9 @@ export default function Home() {
           </p>
         </header>
 
-        <CodeSherlockClient />
+        <div className="max-w-7xl mx-auto w-full">
+          <CodeSherlockClient />
+        </div>
       </div>
     </main>
   );
