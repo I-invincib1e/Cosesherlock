@@ -1,5 +1,6 @@
 'use client';
 
+import React from 'react';
 import { useActionState } from 'react';
 import { useFormStatus } from 'react-dom';
 import { getCodeReview } from './actions';
@@ -7,12 +8,25 @@ import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@/components/ui/accordion';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
-import { AlertTriangle, CircleAlert, Info, Lightbulb, Loader2, Wand2 } from 'lucide-react';
+import {
+  AlertTriangle,
+  CircleAlert,
+  Info,
+  Lightbulb,
+  Loader2,
+  Wand2,
+} from 'lucide-react';
 import type { CodeIssue } from '@/lib/types';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 function SubmitButton() {
   const { pending } = useFormStatus();
@@ -56,9 +70,15 @@ function SeverityBadge({ severity }: { severity: string }) {
   );
 }
 
-function ResultsDisplay({ issues, error }: { issues?: CodeIssue[], error?: string }) {
+function ResultsDisplay({
+  issues,
+  error,
+}: {
+  issues?: CodeIssue[];
+  error?: string;
+}) {
   const { pending } = useFormStatus();
-  
+
   if (pending) {
     return (
       <Card>
@@ -89,22 +109,22 @@ function ResultsDisplay({ issues, error }: { issues?: CodeIssue[], error?: strin
       </Alert>
     );
   }
-  
+
   if (!issues) {
     return (
-        <Card className="text-center">
-            <CardHeader>
-                <div className="mx-auto bg-secondary p-3 rounded-full w-fit">
-                    <Lightbulb className="h-8 w-8 text-secondary-foreground" />
-                </div>
-            </CardHeader>
-            <CardContent>
-                <CardTitle className="mb-2">Ready to Review</CardTitle>
-                <p className="text-muted-foreground">
-                    Enter a filename and paste your code to start the analysis.
-                </p>
-            </CardContent>
-        </Card>
+      <Card className="text-center">
+        <CardHeader>
+          <div className="mx-auto bg-secondary p-3 rounded-full w-fit">
+            <Lightbulb className="h-8 w-8 text-secondary-foreground" />
+          </div>
+        </CardHeader>
+        <CardContent>
+          <CardTitle className="mb-2">Ready to Review</CardTitle>
+          <p className="text-muted-foreground">
+            Enter a filename and paste your code to start the analysis.
+          </p>
+        </CardContent>
+      </Card>
     );
   }
 
@@ -115,12 +135,14 @@ function ResultsDisplay({ issues, error }: { issues?: CodeIssue[], error?: strin
           <CardTitle>All Clear!</CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-muted-foreground">No issues found in the provided code. Great job!</p>
+          <p className="text-muted-foreground">
+            No issues found in the provided code. Great job!
+          </p>
         </CardContent>
       </Card>
     );
   }
-  
+
   return (
     <Card>
       <CardHeader>
@@ -133,22 +155,27 @@ function ResultsDisplay({ issues, error }: { issues?: CodeIssue[], error?: strin
               <AccordionTrigger className="hover:no-underline">
                 <div className="flex items-center gap-4 text-left w-full">
                   <SeverityBadge severity={issue.severity} />
-                  <span className="flex-1 font-medium truncate">{issue.issue}</span>
+                  <span className="flex-1 font-medium truncate">
+                    {issue.issue}
+                  </span>
                 </div>
               </AccordionTrigger>
               <AccordionContent className="pt-2 pb-4 space-y-4">
                 <div className="text-sm text-muted-foreground">
-                  Found in <span className="font-mono text-foreground">{issue.file}</span>
+                  Found in{' '}
+                  <span className="font-mono text-foreground">{issue.file}</span>
                   {issue.line && ` on line ${issue.line}`}
                 </div>
                 <div>
-                    <h4 className="font-semibold mb-2">Issue Description</h4>
-                    <p className="text-muted-foreground">{issue.issue}</p>
+                  <h4 className="font-semibold mb-2">Issue Description</h4>
+                  <p className="text-muted-foreground">{issue.issue}</p>
                 </div>
                 <div>
                   <h4 className="font-semibold mb-2">Suggested Fix</h4>
                   <pre className="bg-muted p-4 rounded-md overflow-x-auto">
-                    <code className="font-code text-sm text-muted-foreground">{issue.fix}</code>
+                    <code className="font-code text-sm text-muted-foreground">
+                      {issue.fix}
+                    </code>
                   </pre>
                 </div>
               </AccordionContent>
@@ -163,42 +190,67 @@ function ResultsDisplay({ issues, error }: { issues?: CodeIssue[], error?: strin
 export function CodeSherlockClient() {
   const initialState = { issues: undefined, error: undefined };
   const [state, formAction] = useActionState(getCodeReview, initialState);
-  
+  const { pending } = useFormStatus();
+  const [activeTab, setActiveTab] = React.useState('review');
+
+  React.useEffect(() => {
+    if (pending || state.issues || state.error) {
+      setActiveTab('analysis');
+    }
+  }, [pending, state.issues, state.error]);
+
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
-      <Card className="sticky top-8">
-        <CardHeader>
-          <CardTitle>Submit Code for Review</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <form action={formAction} className="space-y-4">
-            <div className="space-y-2">
-              <label htmlFor="fileName" className="text-sm font-medium">File Name</label>
-              <Input
-                id="fileName"
-                name="fileName"
-                placeholder="e.g., src/components/button.tsx"
-                required
-              />
-            </div>
-            <div className="space-y-2">
-              <label htmlFor="code" className="text-sm font-medium">Code</label>
-              <Textarea
-                id="code"
-                name="code"
-                placeholder="Paste your code or code diff here..."
-                className="font-code min-h-[300px] lg:min-h-[400px]"
-                required
-              />
-            </div>
-            <SubmitButton />
-          </form>
-        </CardContent>
-      </Card>
-      
-      <div className="lg:mt-0">
-        <ResultsDisplay issues={state.issues} error={state.error} />
+    <Tabs
+      value={activeTab}
+      onValueChange={setActiveTab}
+      className="w-full"
+    >
+      <div className="flex justify-center">
+        <TabsList>
+          <TabsTrigger value="review">Review</TabsTrigger>
+          <TabsTrigger value="analysis" disabled={!state.issues && !state.error && !pending}>Analysis</TabsTrigger>
+        </TabsList>
       </div>
-    </div>
+
+      <TabsContent value="review">
+        <Card>
+          <CardHeader>
+            <CardTitle>Submit Code for Review</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <form action={formAction} className="space-y-4">
+              <div className="space-y-2">
+                <label htmlFor="fileName" className="text-sm font-medium">
+                  File Name
+                </label>
+                <Input
+                  id="fileName"
+                  name="fileName"
+                  placeholder="e.g., src/components/button.tsx"
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <label htmlFor="code" className="text-sm font-medium">
+                  Code
+                </label>
+                <Textarea
+                  id="code"
+                  name="code"
+                  placeholder="Paste your code or code diff here..."
+                  className="font-code min-h-[300px] lg:min-h-[400px]"
+                  required
+                />
+              </div>
+              <SubmitButton />
+            </form>
+          </CardContent>
+        </Card>
+      </TabsContent>
+
+      <TabsContent value="analysis">
+        <ResultsDisplay issues={state.issues} error={state.error} />
+      </TabsContent>
+    </Tabs>
   );
 }
