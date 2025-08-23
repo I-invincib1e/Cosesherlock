@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useActionState } from 'react';
+import React, { useActionState, useEffect, useState } from 'react';
 import { useFormStatus } from 'react-dom';
 import { getCodeReview } from './actions';
 import { Textarea } from '@/components/ui/textarea';
@@ -70,7 +70,7 @@ function SeverityBadge({ severity }: { severity: string }) {
 }
 
 function DiffView({ oldCode, newCode }: { oldCode: string; newCode: string }) {
-  const diffResult = Diff.diffLines(oldCode, newCode, { newlineIsToken: true });
+  const diffResult = Diff.diffLines(oldCode, newCode, { newlineIsToken: false, ignoreWhitespace: false });
 
   return (
     <pre className="bg-muted p-4 rounded-md overflow-x-auto border text-sm">
@@ -86,8 +86,11 @@ function DiffView({ oldCode, newCode }: { oldCode: string; newCode: string }) {
 
           return (
             <span key={index} className={color}>
-              {part.value.split('\n').map((line, i) => (
-                 line && <span key={i} className="block">{prefix}{line}</span>
+              {part.value.split('\n').filter(line => line).map((line, i) => (
+                 <span key={i} className="block">
+                  <span className="inline-block w-6 text-right pr-2">{prefix}</span>
+                  <span>{line}</span>
+                </span>
               ))}
             </span>
           );
@@ -216,7 +219,7 @@ function ResultsDisplay({
 }
 
 export function CodeSherlockClient() {
-  const initialState = { issues: undefined, error: undefined, originalCode: undefined };
+  const initialState = { issues: undefined, error: undefined };
   const [state, formAction] = useActionState(getCodeReview, initialState);
 
   return (
