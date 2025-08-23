@@ -3,8 +3,8 @@
 **Your AI-Powered Code Review Assistant**
 
 Code Sherlock helps you ship better code, faster. Our AI agent analyzes your code for correctness, security, and complexity, providing prioritized fixes to keep you moving.
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/16aab2ae-c7ee-4314-b504-045c0d1e0f00" />
 
-![Code Sherlock Screenshot](https://storage.googleapis.com/firebase-studio-code-sherlock/screenshot.png)
 
 ## ✨ Features
 
