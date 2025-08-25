@@ -21,48 +21,10 @@ Code Sherlock helps you ship better code, faster. Our AI agent analyzes your cod
 - **UI:** [React](https://react.dev/), [ShadCN UI](https://ui.shadcn.com/), [Tailwind CSS](https://tailwindcss.com/)
 - **Deployment:** [Firebase App Hosting](https://firebase.google.com/docs/app-hosting)
 
-## 🏁 Getting Started
 
-To get a local copy up and running, follow these simple steps.
 
-### Prerequisites
+Open : | https://studio--code-sherlock-1ujcp.us-central1.hosted.app | 
 
-- Node.js (v18 or later)
-- npm, yarn, or pnpm
-
-### Installation
-
-1.  **Clone the repository:**
-    ```sh
-    git clone https://github.com/FirebaseExtended/codelab-genkit-code-sherlock.git
-    ```
-2.  **Navigate to the project directory:**
-    ```sh
-    cd codelab-genkit-code-sherlock
-    ```
-3.  **Install NPM packages:**
-    ```sh
-    npm install
-    ```
-4.  **Set up your environment variables:**
-    Create a `.env` file in the root of the project and add your Gemini API key. You can get one from [Google AI Studio](https://aistudio.google.com/app/apikey).
-    ```env
-    GEMINI_API_KEY=YOUR_API_KEY_HERE
-    ```
-5.  **Run the development server:**
-    ```sh
-    npm run dev
-    ```
-
-Open [http://localhost:9002](http://localhost:9002) with your browser to see the result.
-
-##  nasıl kullanılır
-
-1.  Navigate to the [app page](http://localhost:9002/app).
-2.  Enter a file name for context (e.g., `src/components/ui/button.tsx`).
-3.  Paste your code or a code diff into the text area.
-4.  Click "Review Code" and watch the AI agent analyze it in real-time.
-5.  Review the prioritized list of issues and the suggested fixes.
 
 ## 📜 License
 
